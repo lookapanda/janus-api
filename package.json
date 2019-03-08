@@ -5,9 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "eslint .",
-    "build-test": "node ./test/buildtest.js"
+    "build-test": "node ./test/buildtest.js",
+    "build": "rimraf lib && tsc -p tsconfig.release.json"
   },
-  "engines" : { "node" : ">=6" },
+  "engines": {
+    "node": ">=6"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TechTeamer/janus-api.git"
@@ -28,6 +31,9 @@
     "ws": "^6.1.2"
   },
   "devDependencies": {
+    "@types/node": "^11.10.5",
+    "@types/uuid": "^3.4.4",
+    "@types/ws": "^6.0.1",
     "browserify": "^16.0.0",
     "eslint": "^5.9.0",
     "eslint-config-standard": "^12.0.0",
@@ -36,6 +42,15 @@
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
     "http-server": "^0.11.1",
+    "husky": "^1.3.1",
+    "prettier": "^1.16.4",
+    "prettier-tslint": "^0.4.2",
+    "rimraf": "^2.6.3",
+    "tslint": "^5.13.1",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-plugin-prettier": "^2.0.1",
+    "tsutils": "^3.8.0",
+    "typescript": "^3.3.3333",
     "webrtc-adapter": "^6.4.6"
   }
 }
