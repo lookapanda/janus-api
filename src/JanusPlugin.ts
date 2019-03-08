@@ -1,4 +1,4 @@
-import EventEmitter from 'events';
+import { EventEmitter } from 'events';
 import uuid from 'uuid/v4';
 import { Janus, Logger } from './Janus';
 

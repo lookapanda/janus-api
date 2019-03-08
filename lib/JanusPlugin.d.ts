@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import EventEmitter from 'events';
+import { EventEmitter } from 'events';
 import { Janus, Logger } from './Janus';
 export declare class JanusPlugin extends EventEmitter {
     id: string;
