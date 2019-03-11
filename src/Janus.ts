@@ -1,9 +1,7 @@
 import uuid from 'uuid/v4';
-import ws from 'ws';
 import { JanusConfig } from './Config';
 import { JanusPlugin } from './JanusPlugin';
 import { PromiseReject, PromiseResolve } from './shared';
-import getWebSocket from './WebSocket';
 
 const ignoredErrorCodes = [
     458, // JANUS_ERROR_SESSION_NOT_FOUND
@@ -27,7 +25,7 @@ export interface Logger {
 
 export class Janus {
     public isConnected: boolean;
-    public ws: ws;
+    public ws: any;
     public sessionId: string;
     public logger: Logger;
     public transactions: { [key: string]: Transaction };
@@ -35,6 +33,7 @@ export class Janus {
     public config: JanusConfig;
     public protocol: string | string[];
     public sendCreate: boolean;
+    private adapter: any;
 
     constructor(config: JanusConfig, logger: Logger) {
         this.ws = undefined;
@@ -48,6 +47,7 @@ export class Janus {
         this.config = config;
         this.protocol = 'janus-protocol';
         this.sendCreate = true;
+        this.adapter = config.adapter;
     }
 
     public connect() {
@@ -57,10 +57,7 @@ export class Janus {
 
         return new Promise(
             (resolve: PromiseResolve<this>, reject: PromiseReject) => {
-                this.ws = new (getWebSocket()(
-                    this.config.url,
-                    this.protocol
-                ))();
+                this.ws = new this.adapter(this.config.url, this.protocol)();
 
                 this.ws.addEventListener('error', (err: any) => {
                     this.logger.error(

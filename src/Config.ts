@@ -4,13 +4,15 @@ export class JanusConfig {
     public options: any;
     public secret: string;
     public sessionListIntervalMs: number;
+    public adapter: any;
 
     constructor(config: any) {
-        const { url, keepAliveIntervalMs, options } = config;
+        const { url, keepAliveIntervalMs, options, adapter } = config;
 
         this.url = url;
         this.keepAliveIntervalMs = keepAliveIntervalMs;
         this.options = options;
+        this.adapter = adapter;
     }
 }
 
