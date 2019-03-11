@@ -34,8 +34,8 @@ export declare class StreamingJanusPlugin extends JanusPlugin {
         data: any;
         json: any;
     }>;
-    destroy(id: string, permanent?: boolean): Promise<void>;
-    list(): Promise<void>;
+    destroy(id: string, permanent?: boolean): Promise<any>;
+    list(): Promise<any>;
     watch(id: string): Promise<any>;
     start(jsep: string): Promise<{
         data: any;
@@ -49,8 +49,8 @@ export declare class StreamingJanusPlugin extends JanusPlugin {
         data: any;
         json: any;
     }>;
-    info(id: string): Promise<void>;
-    switch(id: string): Promise<void>;
+    info(id: string): Promise<any>;
+    switch(id: string): Promise<any>;
     onmessage(data: any, json: any): void;
     candidate(candidate: any): Promise<any> | void;
 }

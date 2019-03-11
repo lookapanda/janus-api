@@ -68,7 +68,7 @@ export class StreamingJanusPlugin extends JanusPlugin {
         const body = { request: 'destroy', id, permanent };
 
         try {
-            await this.transaction('message', { body }, 'success');
+            return await this.transaction('message', { body }, 'success');
         } catch (err) {
             this.logger.error(
                 'StreamingJanusPlugin, cannot destroy stream',
@@ -82,7 +82,7 @@ export class StreamingJanusPlugin extends JanusPlugin {
         const body = { request: 'list' };
 
         try {
-            await this.transaction('message', { body }, 'success');
+            return await this.transaction('message', { body }, 'success');
         } catch (err) {
             this.logger.error('StreamingJanusPlugin, cannot list streams', err);
             throw err;
@@ -168,49 +168,49 @@ export class StreamingJanusPlugin extends JanusPlugin {
         }
     }
 
-    public stop() {
+    public async stop() {
         const body = { request: 'stop' };
 
-        return this.transaction('message', { body }, 'event')
-            .then(({ data, json }: any) => {
-                if (data.result && data.result.status) {
-                    this.emit('statusChange', data.result.status);
-                }
-                return { data, json };
-            })
-            .catch((err: Error) => {
-                this.logger.error(
-                    'StreamingJanusPlugin, cannot start stream',
-                    err
-                );
-                throw err;
-            });
+        try {
+            const { data, json }: any = await this.transaction(
+                'message',
+                { body },
+                'event'
+            );
+            if (data.result && data.result.status) {
+                this.emit('statusChange', data.result.status);
+            }
+            return { data, json };
+        } catch (err) {
+            this.logger.error('StreamingJanusPlugin, cannot start stream', err);
+            throw err;
+        }
     }
 
-    public pause() {
+    public async pause() {
         const body = { request: 'pause' };
 
-        return this.transaction('message', { body }, 'event')
-            .then(({ data, json }: any) => {
-                if (data.result && data.result.status) {
-                    this.emit('statusChange', data.result.status);
-                }
-                return { data, json };
-            })
-            .catch((err: Error) => {
-                this.logger.error(
-                    'StreamingJanusPlugin, cannot start stream',
-                    err
-                );
-                throw err;
-            });
+        try {
+            const { data, json }: any = await this.transaction(
+                'message',
+                { body },
+                'event'
+            );
+            if (data.result && data.result.status) {
+                this.emit('statusChange', data.result.status);
+            }
+            return { data, json };
+        } catch (err) {
+            this.logger.error('StreamingJanusPlugin, cannot start stream', err);
+            throw err;
+        }
     }
 
     public async info(id: string) {
         const body = { request: 'info', id };
 
         try {
-            await this.transaction('message', { body }, 'success');
+            return await this.transaction('message', { body }, 'success');
         } catch (err) {
             this.logger.error('StreamingJanusPlugin, cannot start stream', err);
             throw err;
@@ -221,7 +221,7 @@ export class StreamingJanusPlugin extends JanusPlugin {
         const body = { request: 'switch', id };
 
         try {
-            await this.transaction('message', { body }, 'event');
+            return await this.transaction('message', { body }, 'event');
         } catch (err) {
             this.logger.error('StreamingJanusPlugin, cannot start stream', err);
             throw err;
@@ -257,5 +257,3 @@ export class StreamingJanusPlugin extends JanusPlugin {
         return this.transaction('trickle', { candidate });
     }
 }
-
-module.exports = StreamingJanusPlugin;

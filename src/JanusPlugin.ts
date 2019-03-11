@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import uuid from 'uuid/v4';
+import * as uuid from 'uuid/v4';
 import { Janus, Logger } from './Janus';
 
 export class JanusPlugin extends EventEmitter {
