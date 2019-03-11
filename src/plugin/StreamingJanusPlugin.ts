@@ -145,7 +145,7 @@ export class StreamingJanusPlugin extends JanusPlugin {
         );
     }
 
-    public async start(jsep: string) {
+    public async start(jsep: RTCSessionDescriptionInit) {
         const body = { request: 'start' };
         const message: any = { body };
         if (jsep) {
