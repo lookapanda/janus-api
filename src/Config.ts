@@ -15,7 +15,12 @@ export class JanusConfig {
     public adapter: any;
 
     constructor(config: JanusConfigInterface) {
-        const { url, keepAliveIntervalMs, options, adapter } = config;
+        const {
+            url,
+            keepAliveIntervalMs = 30 * 1000,
+            options,
+            adapter,
+        } = config;
 
         this.url = url;
         this.keepAliveIntervalMs = keepAliveIntervalMs;
