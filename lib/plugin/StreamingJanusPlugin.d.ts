@@ -36,7 +36,7 @@ export declare class StreamingJanusPlugin extends JanusPlugin {
     }>;
     destroy(id: string, permanent?: boolean): Promise<any>;
     list(): Promise<any>;
-    watch(id: string): Promise<any>;
+    watch(id: number): Promise<any>;
     start(jsep: RTCSessionDescriptionInit): Promise<{
         data: any;
         json: any;

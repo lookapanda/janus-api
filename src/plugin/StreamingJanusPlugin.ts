@@ -89,7 +89,7 @@ export class StreamingJanusPlugin extends JanusPlugin {
         }
     }
 
-    public watch(id: string) {
+    public watch(id: number) {
         const body = { request: 'watch', id };
 
         return new Promise(
