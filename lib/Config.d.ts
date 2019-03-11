@@ -1,10 +1,19 @@
+export interface JanusConfigInterface {
+    url: string;
+    keepAliveIntervalMs?: number;
+    options?: any;
+    secret?: string;
+    sessionListIntervalMs?: number;
+    adapter: any;
+}
 export declare class JanusConfig {
     url: string;
     keepAliveIntervalMs: number;
     options: any;
     secret: string;
     sessionListIntervalMs: number;
-    constructor(config: any);
+    adapter: any;
+    constructor(config: JanusConfigInterface);
 }
 export declare class JanusAdminConfig extends JanusConfig {
     constructor(config: any);

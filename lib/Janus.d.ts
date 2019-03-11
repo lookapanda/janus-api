@@ -1,4 +1,3 @@
-import ws from 'ws';
 import { JanusConfig } from './Config';
 import { JanusPlugin } from './JanusPlugin';
 export interface Transaction {
@@ -16,7 +15,7 @@ export interface Logger {
 }
 export declare class Janus {
     isConnected: boolean;
-    ws: ws;
+    ws: any;
     sessionId: string;
     logger: Logger;
     transactions: {
@@ -26,6 +25,7 @@ export declare class Janus {
     config: JanusConfig;
     protocol: string | string[];
     sendCreate: boolean;
+    private adapter;
     constructor(config: JanusConfig, logger: Logger);
     connect(): Promise<this>;
     addPlugin(plugin: JanusPlugin): Promise<JanusPlugin>;
