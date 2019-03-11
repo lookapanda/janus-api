@@ -1,4 +1,4 @@
-import uuid from 'uuid/v4';
+import * as uuid from 'uuid/v4';
 import { JanusConfig } from './Config';
 import { JanusPlugin } from './JanusPlugin';
 import { PromiseReject, PromiseResolve } from './shared';
