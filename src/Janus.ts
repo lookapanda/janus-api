@@ -57,7 +57,7 @@ export class Janus {
 
         return new Promise(
             (resolve: PromiseResolve<this>, reject: PromiseReject) => {
-                this.ws = new this.adapter(this.config.url, this.protocol)();
+                this.ws = new this.adapter(this.config.url, this.protocol);
 
                 this.ws.addEventListener('error', (err: any) => {
                     this.logger.error(
