@@ -1,3 +1,11 @@
+export interface JanusConfigInterface {
+    url: string;
+    keepAliveIntervalMs?: number;
+    options?: any;
+    secret?: string;
+    sessionListIntervalMs?: number;
+    adapter: any;
+}
 export class JanusConfig {
     public url: string;
     public keepAliveIntervalMs: number;
@@ -6,7 +14,7 @@ export class JanusConfig {
     public sessionListIntervalMs: number;
     public adapter: any;
 
-    constructor(config: any) {
+    constructor(config: JanusConfigInterface) {
         const { url, keepAliveIntervalMs, options, adapter } = config;
 
         this.url = url;
