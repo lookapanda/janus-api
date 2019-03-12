@@ -48,9 +48,9 @@ export declare class Janus<T extends WebSocketInterface> {
     keepAlive(isScheduled?: boolean): void;
     getTransaction(json: any, ignoreReplyType?: boolean): Transaction | void;
     cleanup(): void;
-    _cleanupWebSocket(): void;
-    _cleanupPlugins(): void;
-    _cleanupTransactions(): void;
+    private cleanupWebSocket;
+    private cleanupPlugins;
+    private cleanupTransactions;
     private onWsMessage;
     private onWsClose;
 }

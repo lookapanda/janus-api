@@ -330,12 +330,12 @@ export class Janus<T extends WebSocketInterface> {
     }
 
     public cleanup() {
-        this._cleanupPlugins();
-        this._cleanupWebSocket();
-        this._cleanupTransactions();
+        this.cleanupPlugins();
+        this.cleanupWebSocket();
+        this.cleanupTransactions();
     }
 
-    public _cleanupWebSocket() {
+    private cleanupWebSocket() {
         if (this.ws) {
             if (this.ws.readyState === WebSocket.OPEN) {
                 this.ws.close();
@@ -345,7 +345,7 @@ export class Janus<T extends WebSocketInterface> {
         this.isConnected = false;
     }
 
-    public _cleanupPlugins() {
+    private cleanupPlugins() {
         Object.keys(this.pluginHandles).forEach((pluginId: string) => {
             const plugin = this.pluginHandles[pluginId];
             delete this.pluginHandles[pluginId];
@@ -353,7 +353,7 @@ export class Janus<T extends WebSocketInterface> {
         });
     }
 
-    public _cleanupTransactions() {
+    private cleanupTransactions() {
         Object.values(this.transactions).forEach((transaction: Transaction) => {
             if (transaction.reject) {
                 transaction.reject();
@@ -362,7 +362,7 @@ export class Janus<T extends WebSocketInterface> {
         this.transactions = {};
     }
 
-    private onWsMessage(messageEvent: any) {
+    private onWsMessage = (messageEvent: any) => {
         let json: any;
         try {
             json = JSON.parse(messageEvent.data);
@@ -582,7 +582,7 @@ export class Janus<T extends WebSocketInterface> {
                 this.sessionId
         );
         this.logger.debug(json);
-    }
+    };
 
     private onWsClose = () => {
         this.cleanup();
