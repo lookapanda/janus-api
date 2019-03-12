@@ -1,9 +1,9 @@
 /// <reference types="node" />
 import { EventEmitter } from 'events';
-import { Janus, Logger } from './Janus';
-export declare class JanusPlugin extends EventEmitter {
+import { Janus, Logger, WebSocketInterface } from './Janus';
+export declare class JanusPlugin<T extends WebSocketInterface> extends EventEmitter {
     id: string;
-    janus: Janus;
+    janus: Janus<T>;
     janusHandleId: string;
     pluginName: string;
     logger: Logger;
@@ -13,7 +13,7 @@ export declare class JanusPlugin extends EventEmitter {
         opaque_id: string;
     };
     transaction(message: string, additionalFields: any, replyType?: string): Promise<any>;
-    success(janus: Janus, janusHandleId: string): this;
+    success(janus: Janus<T>, janusHandleId: string): this;
     error(cause: string): void;
     onmessage(data: any, json: any): void;
     oncleanup(): void;

@@ -1,10 +1,10 @@
 import { EventEmitter } from 'events';
 import * as uuid from 'uuid/v4';
-import { Janus, Logger } from './Janus';
+import { Janus, Logger, WebSocketInterface } from './Janus';
 
-export class JanusPlugin extends EventEmitter {
+export class JanusPlugin<T extends WebSocketInterface> extends EventEmitter {
     public id: string;
-    public janus: Janus;
+    public janus: Janus<T>;
     public janusHandleId: string;
     public pluginName: string;
     public logger: Logger;
@@ -37,7 +37,7 @@ export class JanusPlugin extends EventEmitter {
         return this.janus.transaction(message, payload, replyType);
     }
 
-    public success(janus: Janus, janusHandleId: string) {
+    public success(janus: Janus<T>, janusHandleId: string) {
         this.janus = janus;
         this.janusHandleId = janusHandleId;
 

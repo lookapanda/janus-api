@@ -1,4 +1,4 @@
-import { Logger } from '../Janus';
+import { Logger, WebSocketInterface } from '../Janus';
 import { JanusPlugin } from '../JanusPlugin';
 import { SdpHelper } from '../SdpHelper';
 
@@ -22,7 +22,9 @@ export interface Parameters {
     ondemand?: string;
     rtsp?: any;
 }
-export class StreamingJanusPlugin extends JanusPlugin {
+export class StreamingJanusPlugin<
+    T extends WebSocketInterface
+> extends JanusPlugin<T> {
     public filterDirectCandidates: boolean;
     public janusEchoBody: { audio: boolean; video: boolean };
     public pluginName: string;

@@ -23,9 +23,25 @@ export interface Logger {
     debug: (...args: any[]) => any;
 }
 
-export class Janus {
+export interface WebSocketSendOptions {
+    compress?: boolean;
+    binary?: boolean;
+    fin?: boolean;
+    mask?: boolean;
+}
+export type WSCallback = (...args: any[]) => void;
+export interface WebSocketInterface extends WebSocket {
+    send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void;
+    send(
+        data: string | ArrayBufferLike | Blob | ArrayBufferView,
+        options: WebSocketSendOptions | WSCallback,
+        cb: WSCallback
+    ): void;
+}
+
+export class Janus<T extends WebSocketInterface> {
     public isConnected: boolean;
-    public ws: any;
+    public ws: T;
     public sessionId: string;
     public logger: Logger;
     public transactions: { [key: string]: Transaction };
@@ -68,9 +84,7 @@ export class Janus {
                     reject(err);
                 });
 
-                this.ws.addEventListener('close', () => {
-                    this.cleanup();
-                });
+                this.ws.addEventListener('close', this.onWsClose);
 
                 this.ws.addEventListener('open', () => {
                     if (!this.sendCreate) {
@@ -111,17 +125,12 @@ export class Janus {
                     this.ws.send(JSON.stringify(request));
                 });
 
-                this.ws.addEventListener('message', (event: any) => {
-                    this.onMessage(event);
-                });
-                this.ws.addEventListener('close', () => {
-                    this.onClose();
-                });
+                this.ws.addEventListener('message', this.onWsMessage);
             }
         );
     }
 
-    public async addPlugin(plugin: JanusPlugin) {
+    public async addPlugin(plugin: JanusPlugin<T>) {
         if (!(plugin instanceof JanusPlugin)) {
             return Promise.reject(new Error('plugin is not a JanusPlugin'));
         }
@@ -232,7 +241,7 @@ export class Janus {
         }
     }
 
-    public destroyPlugin(plugin: JanusPlugin) {
+    public destroyPlugin(plugin: JanusPlugin<T>) {
         return new Promise(
             (resolve: PromiseResolve<void>, reject: PromiseReject) => {
                 if (!(plugin instanceof JanusPlugin)) {
@@ -270,7 +279,90 @@ export class Janus {
         );
     }
 
-    public onMessage(messageEvent: any) {
+    public onClose() {
+        if (!this.isConnected) {
+            return;
+        }
+
+        this.isConnected = false;
+        this.logger.error('Lost connection to the gateway (is it down?)');
+    }
+
+    public keepAlive(isScheduled?: boolean) {
+        if (!this.ws || !this.isConnected || !this.sessionId) {
+            return;
+        }
+
+        if (isScheduled) {
+            setTimeout(() => {
+                this.keepAlive();
+            }, this.config.keepAliveIntervalMs);
+        } else {
+            // logger.debug('Sending Janus keepalive')
+            this.transaction('keepalive')
+                .then(() => {
+                    setTimeout(() => {
+                        this.keepAlive();
+                    }, this.config.keepAliveIntervalMs);
+                })
+                .catch((err: Error) => {
+                    this.logger.warn('Janus keepalive error', err);
+                });
+        }
+    }
+
+    public getTransaction(
+        json: any,
+        ignoreReplyType: boolean = false
+    ): Transaction | void {
+        const type = json.janus;
+        const transactionId = json.transaction;
+        if (
+            transactionId &&
+            this.transactions.hasOwnProperty(transactionId) &&
+            (ignoreReplyType ||
+                this.transactions[transactionId].replyType === type)
+        ) {
+            const ret = this.transactions[transactionId];
+            delete this.transactions[transactionId];
+            return ret;
+        }
+    }
+
+    public cleanup() {
+        this._cleanupPlugins();
+        this._cleanupWebSocket();
+        this._cleanupTransactions();
+    }
+
+    public _cleanupWebSocket() {
+        if (this.ws) {
+            if (this.ws.readyState === WebSocket.OPEN) {
+                this.ws.close();
+            }
+        }
+        this.ws = undefined;
+        this.isConnected = false;
+    }
+
+    public _cleanupPlugins() {
+        Object.keys(this.pluginHandles).forEach((pluginId: string) => {
+            const plugin = this.pluginHandles[pluginId];
+            delete this.pluginHandles[pluginId];
+            plugin.detach();
+        });
+    }
+
+    public _cleanupTransactions() {
+        Object.values(this.transactions).forEach((transaction: Transaction) => {
+            if (transaction.reject) {
+                transaction.reject();
+            }
+        });
+        this.transactions = {};
+    }
+
+    private onWsMessage(messageEvent: any) {
         let json: any;
         try {
             json = JSON.parse(messageEvent.data);
@@ -492,87 +584,8 @@ export class Janus {
         this.logger.debug(json);
     }
 
-    public onClose() {
-        if (!this.isConnected) {
-            return;
-        }
-
-        this.isConnected = false;
-        this.logger.error('Lost connection to the gateway (is it down?)');
-    }
-
-    public keepAlive(isScheduled?: boolean) {
-        if (!this.ws || !this.isConnected || !this.sessionId) {
-            return;
-        }
-
-        if (isScheduled) {
-            setTimeout(() => {
-                this.keepAlive();
-            }, this.config.keepAliveIntervalMs);
-        } else {
-            // logger.debug('Sending Janus keepalive')
-            this.transaction('keepalive')
-                .then(() => {
-                    setTimeout(() => {
-                        this.keepAlive();
-                    }, this.config.keepAliveIntervalMs);
-                })
-                .catch((err: Error) => {
-                    this.logger.warn('Janus keepalive error', err);
-                });
-        }
-    }
-
-    public getTransaction(
-        json: any,
-        ignoreReplyType: boolean = false
-    ): Transaction | void {
-        const type = json.janus;
-        const transactionId = json.transaction;
-        if (
-            transactionId &&
-            this.transactions.hasOwnProperty(transactionId) &&
-            (ignoreReplyType ||
-                this.transactions[transactionId].replyType === type)
-        ) {
-            const ret = this.transactions[transactionId];
-            delete this.transactions[transactionId];
-            return ret;
-        }
-    }
-
-    public cleanup() {
-        this._cleanupPlugins();
-        this._cleanupWebSocket();
-        this._cleanupTransactions();
-    }
-
-    public _cleanupWebSocket() {
-        if (this.ws) {
-            this.ws.removeAllListeners();
-            if (this.ws.readyState === WebSocket.OPEN) {
-                this.ws.close();
-            }
-        }
-        this.ws = undefined;
-        this.isConnected = false;
-    }
-
-    public _cleanupPlugins() {
-        Object.keys(this.pluginHandles).forEach((pluginId: string) => {
-            const plugin = this.pluginHandles[pluginId];
-            delete this.pluginHandles[pluginId];
-            plugin.detach();
-        });
-    }
-
-    public _cleanupTransactions() {
-        Object.values(this.transactions).forEach((transaction: Transaction) => {
-            if (transaction.reject) {
-                transaction.reject();
-            }
-        });
-        this.transactions = {};
-    }
+    private onWsClose = () => {
+        this.cleanup();
+        this.onClose();
+    };
 }
